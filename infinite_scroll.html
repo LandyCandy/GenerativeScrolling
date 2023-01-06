@@ -11,8 +11,6 @@
         margin: 0 auto;
       }
       .item {
-        background-color: lightgray;
-        border: 1px solid black;
         margin: 10px 0;
         padding: 10px;
       }
@@ -23,6 +21,9 @@
       <!-- Add a container for the infinite scroll -->
       <div id="infinite-scroll">
         <div>How much scroll is too much scroll?</div>
+        <label for="fname">Prompt:</label>
+        <input type="text" id="prompt" name="prompt"> 
+        <button onclick="loadContent()">Submit</button> 
       </div>
       
     </div>
@@ -33,7 +34,6 @@
       var container = document.getElementById("infinite-scroll");
       //   var loading = document.getElementById("loading");
       var finished = false;
-      loadContent();
       // Add an event listener for the scroll event
       window.addEventListener("scroll", function() {
         // Check if we've reached the bottom of the page
@@ -47,16 +47,13 @@
         }
       });
 
-      window.addEventListener("click", function() {
-          // Load more content
-          loadContent();
-      });
-
       // Load more content function
       function loadContent() {
         // Make a request for more data
         var request = new XMLHttpRequest();
-        request.open("GET", "https://api.landycandy.limited/generative-scrolling-generate-snip", true);
+        var prompt = document.getElementById('prompt').value
+        prompt = prompt.replace(" ", "+")
+        request.open("GET", "https://api.landycandy.limited/generative-scrolling-generate-snip?prompt=" + prompt, true);
         request.onload = function() { 
           if (request.status >= 200 && request.status < 400) {
             // If the request is successful, increment the page counter and add the new data to the page

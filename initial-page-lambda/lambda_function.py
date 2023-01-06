@@ -9,8 +9,8 @@ openai.api_key = os.environ['OPENAI_KEY']
 
 def lambda_handler(event, context):
     #get prompt from sender and hit openAPI with it
-    # prompt = urllib.parse.unquote(event['prompt'], encoding='utf-8', errors='replace')
-    prompt = "anime robots fighting each other"
+    prompt = urllib.parse.unquote(event['queryStringParameters']['prompt'], encoding='utf-8', errors='replace')
+    prompt = prompt.replace("+", " ")
 
     image_response = openai.Image.create(
         prompt=prompt,
@@ -72,6 +72,8 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     input_event = {
-        'prompt': 'puppy stuff',
+        'queryStringParameters' :{
+            'prompt': 'puppy stuff'
+        }
     }
     print(lambda_handler(input_event, {}))
