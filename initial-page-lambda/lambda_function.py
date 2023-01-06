@@ -1,7 +1,7 @@
 import os
 import urllib
 import openai
-# from stable_diffusion import generate_image
+from stable_diffusion import generate_image
 # from chat_history import ChatHistory
 
 openai.organization = os.environ['OPENAI_ORG']
@@ -12,16 +12,17 @@ def lambda_handler(event, context):
     prompt = urllib.parse.unquote(event['queryStringParameters']['prompt'], encoding='utf-8', errors='replace')
     prompt = prompt.replace("+", " ")
 
-    image_response = openai.Image.create(
-        prompt=prompt,
-        n=1,
-        size="1024x1024"
-    )
-    image_url = image_response['data'][0]['url']
+    image_url = generate_image(prompt)
+    # image_response = openai.Image.create(
+    #     prompt=prompt,
+    #     n=1,
+    #     size="512x512"
+    # )
+    # image_url = image_response['data'][0]['url']
 
 
     text_prompt = """
-        generate some html content inside a div tag with a unique id. generate the content based on the following prompt: "%s" and incorporate the image at this url: "%s"
+        generate some html content inside a div tag with a unique id. generate the content as a new chapter in the following story: "%s" and incorporate the image at this url: "%s"
     """
     prompt = text_prompt % (prompt, image_url)
     text_response = openai.Completion.create(

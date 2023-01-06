@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 from stability_sdk import client
 import stability_sdk.interfaces.gooseai.generation.generation_pb2 as generation
 
-def generate_image(prompt, clip_flag):
+def generate_image(prompt, clip_flag=False):
     # Our Host URL should not be prepended with "https" nor should it have a trailing slash.
     os.environ['STABILITY_HOST'] = 'grpc.stability.ai:443'
 

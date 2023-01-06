@@ -20,10 +20,12 @@
     <div class="container">
       <!-- Add a container for the infinite scroll -->
       <div id="infinite-scroll">
-        <div>How much scroll is too much scroll?</div>
-        <label for="fname">Prompt:</label>
-        <input type="text" id="prompt" name="prompt"> 
-        <button onclick="loadContent()">Submit</button> 
+        <div id="prompt_field">
+          <div>How much scroll is too much scroll?</div>
+          <label for="fname">Prompt:</label>
+          <input type="text" id="prompt" name="prompt"> 
+          <button onclick="loadContent()">Submit</button> 
+        </div>
       </div>
       
     </div>
@@ -32,16 +34,18 @@
     <script type="text/javascript">
       // Initialize some variables
       var container = document.getElementById("infinite-scroll");
-      //   var loading = document.getElementById("loading");
-      var finished = false;
+      var prompt_field = document.getElementById("prompt_field");
+      var prompt = document.getElementById('prompt').value
+      let height_checkpoint = document.body.offsetHeight;
+
       // Add an event listener for the scroll event
       window.addEventListener("scroll", function() {
-        // Check if we've reached the bottom of the page
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-          // If the page has already finished loading, do nothing
-          if (finished) {
-            return;
-          }
+        const currentHeight = document.body.offsetHeight;
+        // Check if we've reached the bottom of the page and if we've already been here
+        if (currentHeight > height_checkpoint && window.innerHeight + window.scrollY >= currentHeight) {
+          //Update checkpoint
+          height_checkpoint = currentHeight;
+
           // Load more content
           loadContent();
         }
@@ -51,31 +55,31 @@
       function loadContent() {
         // Make a request for more data
         var request = new XMLHttpRequest();
-        var prompt = document.getElementById('prompt').value
+
+        //Get prompt and remove whitespace
+        prompt_field.style.display = "none";
         prompt = prompt.replace(" ", "+")
+        
         request.open("GET", "https://api.landycandy.limited/generative-scrolling-generate-snip?prompt=" + prompt, true);
+        
         request.onload = function() { 
           if (request.status >= 200 && request.status < 400) {
-            // If the request is successful, increment the page counter and add the new data to the page
+            // If the request is successful add the new html snippet
             var data = request.responseText;
             var item = document.createElement("div");
             item.className = "item";
             item.innerHTML = data;
-            container.appendChild(item);
-            // Hide the loading spinner
-            // loading.style.display = "none";
-          } else {
-            // If the request fails, set the finished flag to true so we don't try to load more data
-            finished = true;
-            // Hide the loading spinner
-            // loading.style.display = "none";
-            // // Show an error message
-            // loading.innerHTML = "An error occurred while loading the content.";
+            container.insertBefore(item, prompt_field);
+            prompt = item.previousElementSibling.textContent;
           }
         };
+
         request.onerror = function() {
           // If there is an error, set the finished flag to true so we don't try to load more data
-          finished = true;
+          var item = document.createElement("div");
+          item.className = "item";
+          item.innerHTML = "Error during content generation call";
+          container.insertBefore(item, prompt_field);
         };
         
         request.send();

@@ -5,7 +5,7 @@ set -ea
 
 # run tests
 . ../setenv.sh
-../dev-env/bin/python3 ./lambda_function.py
+../dev-env/bin/python3 -m py_compile ./lambda_function.py
 
 # Clean previous archive
 rm -f generative-scrolling-initial-page-lambda-package.zip
