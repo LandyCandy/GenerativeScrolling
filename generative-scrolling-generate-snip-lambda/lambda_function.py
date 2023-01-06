@@ -2,7 +2,7 @@ import os
 import urllib
 import openai
 from stable_diffusion import generate_image
-# from chat_history import ChatHistory
+# from story_history import StoryHistory
 
 openai.organization = os.environ['OPENAI_ORG']
 openai.api_key = os.environ['OPENAI_KEY']

@@ -1,4 +1,4 @@
 .DS_Store
 setenv.sh
-initial-page-lambda/python
-initial-page-lambda/generative-scrolling-initial-page-lambda-package.zip
+generative-scrolling-generate-snip-lambda/python
+generative-scrolling-generate-snip-lambda/generative-scrolling-generate-snip-lambda-package.zip

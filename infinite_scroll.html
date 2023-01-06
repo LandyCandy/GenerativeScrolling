@@ -24,7 +24,7 @@
           <div>How much scroll is too much scroll?</div>
           <label for="fname">Prompt:</label>
           <input type="text" id="prompt" name="prompt"> 
-          <button onclick="loadContent()">Submit</button> 
+          <button onclick="loadClickContent()">Submit</button> 
         </div>
       </div>
       
@@ -34,9 +34,20 @@
     <script type="text/javascript">
       // Initialize some variables
       var container = document.getElementById("infinite-scroll");
-      var prompt_field = document.getElementById("prompt_field");
-      var prompt = document.getElementById('prompt').value
       let height_checkpoint = document.body.offsetHeight;
+
+      function loadClickContent() {
+        var prompt = document.getElementById('prompt').value;
+        var prompt_field = document.getElementById("prompt_field");
+        prompt_field.remove();
+
+        var item = document.createElement("div");
+        item.className = "item";
+        item.innerHTML = data;
+        container.appendChild(item);
+
+        loadContent(prompt);
+      }
 
       // Add an event listener for the scroll event
       window.addEventListener("scroll", function() {
@@ -46,18 +57,20 @@
           //Update checkpoint
           height_checkpoint = currentHeight;
 
+          //Get previous text for new prompt
+          var prompt = container.lastChild.textContent;
+
           // Load more content
-          loadContent();
+          loadContent(prompt);
         }
       });
 
       // Load more content function
-      function loadContent() {
+      function loadContent(prompt) {
         // Make a request for more data
         var request = new XMLHttpRequest();
 
         //Get prompt and remove whitespace
-        prompt_field.style.display = "none";
         prompt = prompt.replace(" ", "+")
         
         request.open("GET", "https://api.landycandy.limited/generative-scrolling-generate-snip?prompt=" + prompt, true);
@@ -69,8 +82,7 @@
             var item = document.createElement("div");
             item.className = "item";
             item.innerHTML = data;
-            container.insertBefore(item, prompt_field);
-            prompt = item.previousElementSibling.textContent;
+            container.appendChild(item);
           }
         };
 
@@ -79,7 +91,7 @@
           var item = document.createElement("div");
           item.className = "item";
           item.innerHTML = "Error during content generation call";
-          container.insertBefore(item, prompt_field);
+          container.appendChild(item);
         };
         
         request.send();
