@@ -9,7 +9,7 @@ openai.api_key = os.environ['OPENAI_KEY']
 
 def lambda_handler(event, context):
     #get prompt from sender and hit openAPI with it
-    prompt = urllib.parse.unquote(event['queryStringParameters']['prompt'], encoding='utf-8', errors='replace')
+    prompt = urllib.parse.unquote(event['prompt'], encoding='utf-8', errors='replace')
     prompt = prompt.replace("+", " ")
 
     image_url = generate_image(prompt)
@@ -65,8 +65,7 @@ def lambda_handler(event, context):
     return {
       "statusCode": 200,
       "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Content-Type": "application/json"
+        "Access-Control-Allow-Origin": "*"
       },
       "body": text_prompt_response
     }

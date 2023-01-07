@@ -43,7 +43,7 @@
 
         var item = document.createElement("div");
         item.className = "item";
-        item.innerHTML = data;
+        item.innerHTML = prompt;
         container.appendChild(item);
 
         loadContent(prompt);
@@ -73,15 +73,15 @@
         //Get prompt and remove whitespace
         prompt = prompt.replace(" ", "+")
         
-        request.open("GET", "https://api.landycandy.limited/generative-scrolling-generate-snip?prompt=" + prompt, true);
+        request.open("GET", "https://infiniscroll.landycandy.limited/generate-snip?prompt=" + prompt, true);
         
         request.onload = function() { 
           if (request.status >= 200 && request.status < 400) {
             // If the request is successful add the new html snippet
-            var data = request.responseText;
+            var data = request.response;
             var item = document.createElement("div");
             item.className = "item";
-            item.innerHTML = data;
+            item.innerHTML = data
             container.appendChild(item);
           }
         };
