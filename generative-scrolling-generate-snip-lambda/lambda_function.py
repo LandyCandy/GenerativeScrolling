@@ -7,59 +7,48 @@ from stable_diffusion import generate_image
 openai.organization = os.environ['OPENAI_ORG']
 openai.api_key = os.environ['OPENAI_KEY']
 
+TEXT_PROMPT = """
+    generate some html content inside a div tag with a unique id. generate the content as a new chapter in the following story: "%s"
+"""
+
+TEXT_IMAGE_PROMPT = """
+    generate some html content inside a div tag with a unique id. generate the content as a new and unique continuation of the following story: "%s" and incorporate the image at this url: "%s"
+"""
+
 def lambda_handler(event, context):
     #get prompt from sender and hit openAPI with it
     prompt = urllib.parse.unquote(event['prompt'], encoding='utf-8', errors='replace')
     prompt = prompt.replace("+", " ")
 
-    image_url = generate_image(prompt)
-    # image_response = openai.Image.create(
-    #     prompt=prompt,
-    #     n=1,
-    #     size="512x512"
-    # )
-    # image_url = image_response['data'][0]['url']
-
-
-    text_prompt = """
-        generate some html content inside a div tag with a unique id. generate the content as a new chapter in the following story: "%s" and incorporate the image at this url: "%s"
-    """
-    prompt = text_prompt % (prompt, image_url)
     text_response = openai.Completion.create(
         model="text-davinci-003",
         prompt=prompt,
         temperature=0.9,
         max_tokens=1000,
         top_p=1,
-        frequency_penalty=0.0,
-        presence_penalty=0.6,
-        best_of=1
+        frequency_penalty=1.0,
+        presence_penalty=1.0
     )
 
     text_prompt_response = text_response["choices"][0]["text"]
 
-    # code_prompt = """
-    #     generate some html content inside a div tag with a unique id. generate the content based on the following prompt: "%s" and incorporate the image at this url: "%s"
-    # """
-    # code_prompt = code_prompt % (text_prompt_response, image_url)
-    # code_response = openai.Completion.create(
-    #     model="code-davinci-002",
-    #     prompt=code_prompt,
-    #     temperature=0,
-    #     max_tokens=1000,
-    #     top_p=0.1,
-    #     frequency_penalty=0.0,
-    #     presence_penalty=0.6,
-    #     best_of=3,
-    #     # stop=["\nHuman:", "\nAI:"]
-    # )
+    if 'image' in event and event['image']:
+        image_url = generate_image(prompt, event['init_img'])
+        prompt = TEXT_IMAGE_PROMPT % (text_prompt_response, image_url)
+    else:
+        prompt = TEXT_PROMPT % text_prompt_response
 
-    # code_response = code_response["choices"][0]["text"]
+    html_response = openai.Completion.create(
+        model="text-davinci-003",
+        prompt=prompt,
+        temperature=0.9,
+        max_tokens=1000,
+        top_p=1,
+        frequency_penalty=0.5,
+        presence_penalty=0.5
+    )
 
-    # chatHistory = ChatHistory(client_number)
-    # full_prompt = chatHistory.retrieve_append_chat(prompt)
-
-    # chatHistory.update_chat_remote(full_prompt, prompt_response)
+    html_prompt_response = html_response["choices"][0]["text"]
 
 
     return {
@@ -67,7 +56,7 @@ def lambda_handler(event, context):
       "headers": {
         "Access-Control-Allow-Origin": "*"
       },
-      "body": text_prompt_response
+      "body": html_prompt_response
     }
 
 if __name__ == "__main__":

@@ -3,16 +3,15 @@
   <head>
     <style>
       /* Add some style to the page */
-      body {
+      html, body {
+        margin: 0;
         font-family: sans-serif;
+        text-align: center;
       }
       .container {
-        max-width: 800px;
-        margin: 0 auto;
-      }
-      .item {
-        margin: 10px 0;
-        padding: 10px;
+        left: 1em;
+        right: 1em;
+        margin: 0 2em;
       }
     </style>
   </head>
@@ -24,6 +23,7 @@
           <div>How much scroll is too much scroll?</div>
           <label for="fname">Prompt:</label>
           <input type="text" id="prompt" name="prompt"> 
+          <label><input id="imagecheck" type="checkbox">Image</label>
           <button onclick="loadClickContent()">Submit</button> 
         </div>
       </div>
@@ -34,19 +34,21 @@
     <script type="text/javascript">
       // Initialize some variables
       var container = document.getElementById("infinite-scroll");
+      var imageChecked = document.getElementById("imagecheck").checked
       let height_checkpoint = document.body.offsetHeight;
 
       function loadClickContent() {
         var prompt = document.getElementById('prompt').value;
         var prompt_field = document.getElementById("prompt_field");
-        prompt_field.remove();
+        imageChecked = document.getElementById("imagecheck").checked
+        prompt_field.style.display = 'none';
 
         var item = document.createElement("div");
         item.className = "item";
         item.innerHTML = prompt;
         container.appendChild(item);
 
-        loadContent(prompt);
+        loadContent(prompt, null);
       }
 
       // Add an event listener for the scroll event
@@ -58,23 +60,29 @@
           height_checkpoint = currentHeight;
 
           //Get previous text for new prompt
-          var prompt = container.lastChild.textContent;
+          var lastChild = container.lastChild;
+          var lastImg = lastChild.querySelector('img').src;
+          var prompt = lastChild.textContent;
+          if (lastChild.previousSibling) {
+            lastChild = lastChild.previousSibling;
+            prompt = lastChild.textContent + prompt;
+          }
 
           // Load more content
-          loadContent(prompt);
+          loadContent(prompt, lastImg);
         }
       });
 
       // Load more content function
-      function loadContent(prompt) {
+      function loadContent(prompt, init_img) {
         // Make a request for more data
         var request = new XMLHttpRequest();
 
         //Get prompt and remove whitespace
         prompt = prompt.replace(" ", "+")
         
-        request.open("GET", "https://infiniscroll.landycandy.limited/generate-snip?prompt=" + prompt, true);
-        
+        request.open("POST", "https://infiniscroll.landycandy.limited/generate-snip", true);
+
         request.onload = function() { 
           if (request.status >= 200 && request.status < 400) {
             // If the request is successful add the new html snippet
@@ -94,7 +102,11 @@
           container.appendChild(item);
         };
         
-        request.send();
+        request.send(JSON.stringify({
+          "prompt" : prompt,
+          "image" : imageChecked,
+          "init_img" : init_img
+        }));
 
         }
     </script>
