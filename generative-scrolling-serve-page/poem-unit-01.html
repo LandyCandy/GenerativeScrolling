@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      /* Add some style to the page */
+      html, body {
+        margin: 1rem;
+        font-family: monospace;
+        text-align: center;
+      }
+      .container {
+        left: 1em;
+        right: 1em;
+        margin: 0 2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Add a container for the infinite scroll -->
+      <div id="infinite-scroll">
+        <div id="prompt_field">
+          <label for="fname">Prompt:</label>
+          <select name="times" id="topicInput">
+            <option value="linear time">linear time</option>
+            <option value="nap time">nap time</option>
+            <option value="liminal time">liminal time</option>
+            <option value="ambient time">ambient time</option>
+            <option value="time travel">time travel</option>
+            <option value="queer time">queer time</option>
+            <option value="forgotten time">forgotten time</option>
+            <option value="embodied time">embodied time</option>
+            <option value="propechies">prophecies</option>
+            <option value="non-linear time">non-linear time</option>
+            <option value="end of time">end of time</option>
+            <option value="static time">static time</option>
+            <option value="time loop">time loop</option>
+          </select>
+          <label><input id="imagecheck" type="checkbox">Image</label>
+          <button onclick="insertPrompt()">Generate Prompt</button> 
+          <button onclick="loadClickContent()">Submit</button> 
+          <section id="promptArea"></section>
+        </div>
+      </div>
+      
+    </div>
+
+    <!-- Add a script to handle the infinite scroll -->
+    <script type="text/javascript">
+      // Initialize some variables
+      var container = document.getElementById("infinite-scroll");
+      var promptArea = document.getElementById('promptArea');
+      var imageChecked = document.getElementById("imagecheck").checked
+      let height_checkpoint = document.body.offsetHeight;
+
+      function loadClickContent() {
+        var prompt = getPrompt();
+        var prompt_field = document.getElementById("prompt_field");
+        imageChecked = document.getElementById("imagecheck").checked
+        prompt_field.style.display = 'none';
+
+        var item = document.createElement("div");
+        item.className = "item";
+        item.innerHTML = prompt;
+        container.appendChild(item);
+
+        loadContent(prompt, null);
+      }
+
+      // Load more content function
+      function loadContent(prompt, init_img) {
+        // Make a request for more data
+        var request = new XMLHttpRequest();
+
+        //Get prompt and remove whitespace
+        prompt = prompt.replace(" ", "+")
+        
+        request.open("POST", "https://infiniscroll.landycandy.limited/generate-snip", true);
+
+        request.onload = function() { 
+          if (request.status >= 200 && request.status < 400) {
+            // If the request is successful add the new html snippet
+            var data = request.response;
+            var item = document.createElement("div");
+            item.className = "item";
+            item.innerHTML = data
+            container.appendChild(item);
+          }
+        };
+
+        request.onerror = function() {
+          // If there is an error, set the finished flag to true so we don't try to load more data
+          var item = document.createElement("div");
+          item.className = "item";
+          item.innerHTML = "Error during content generation call";
+          container.appendChild(item);
+        };
+        
+        request.send(JSON.stringify({
+          "prompt" : prompt,
+          "image" : imageChecked,
+          "init_img" : init_img
+        }));
+
+        }
+
+
+        function insertPrompt() {
+          var text = document.createTextNode(getPrompt())
+          promptArea.appendChild(text)
+        }
+
+        function getTopicInputValue() {
+          var e = document.getElementById("topicInput");
+          return e.value;
+        }
+
+        function getPrompt() {
+          const topic = getTopicInputValue()
+          const intro = `Write an esoteric essay on the subject of time. The topic of the essay should be: ${topic}. The essay should be in the style of the Cybernetic Culture Research Unit (CCRU). Here is a sample of their writing style`
+          const styleSample = `Who does the Earth think it is? It's a matter of consistency. Start with the scientific story, which goes like this: between four point five and four billion years ago - during the Hadean epoch - the earth was kept in a state of superheated molten slag, through the conversion of planetesimal and meteoritic impacts into temperature increase (kinetic to thermic energy). As the solar-system condensed the rate and magnitude of collisions steadily declined, and the terrestrial surface cooled, due to the radiation of heat into space, reinforced by the beginnings of the hydrocycle. During the ensuing - Archaen - epoch the molten core was buried within a crustal shell, producing an insulated reservoir of primal exogeneous trauma, the geocosmic motor of terrestrial transmutation. And that's it. That's plutonics, or neoplutonism. It's all there: anorganic memory, plutonic looping of external collisions into interior content, impersonal trauma as drive-mechanism. The descent into the body of the earth corresponds to a regression through geocosmic time.`
+
+          const prompt = `${intro}: "${styleSample}"`
+
+          return prompt
+        }
+    </script>
+  </body>
+</html>
